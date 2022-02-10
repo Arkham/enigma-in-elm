@@ -146,13 +146,19 @@ rotorsByName =
         |> Dict.fromList
 
 
+{-| Choose a rotor to put in the enigma machine. Since there was no computing
+they used to use 1-based indexes.
+-}
 choose : Rotor -> Int -> ChosenRotor
 choose rotor position =
     { rotor = rotor
-    , position = position
+    , position = position - 1
     }
 
 
+{-| Choose a rotor to put in the enigma machine. Since there was no computing
+they used to use 1-based indexes.
+-}
 chooseFromString : String -> Int -> Maybe ChosenRotor
 chooseFromString str position =
     Dict.get str rotorsByName

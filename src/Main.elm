@@ -15,30 +15,51 @@ import Rotor exposing (ChosenRotor, Rotor)
 type alias Model =
     { input : String
     , enigma : Enigma
+    , leftRotorPosition : Int
+    , middleRotorPosition : Int
+    , rightRotorPosition : Int
     }
+
+
+type WhichRotor
+    = LeftRotor
+    | MiddleRotor
+    | RightRotor
 
 
 type Msg
     = InputChanged String
-    | LeftRotorChanged String
-    | MiddleRotorChanged String
-    | RightRotorChanged String
+    | RotorChanged WhichRotor String
+    | RotorPositionChanged WhichRotor String
     | ReflectorChanged String
 
 
 main : Program () Model Msg
 main =
+    let
+        initialLeftRotorPosition =
+            1
+
+        initialMiddleRotorPosition =
+            1
+
+        initialRightRotorPosition =
+            1
+    in
     Browser.element
         { init =
             \_ ->
-                ( { input = ""
+                ( { input = "Hello darkness my old friend"
                   , enigma =
-                        { leftRotor = Rotor.choose Rotor.rotorI 0
-                        , middleRotor = Rotor.choose Rotor.rotorII 0
-                        , rightRotor = Rotor.choose Rotor.rotorIII 0
+                        { leftRotor = Rotor.choose Rotor.rotorI initialLeftRotorPosition
+                        , middleRotor = Rotor.choose Rotor.rotorII initialMiddleRotorPosition
+                        , rightRotor = Rotor.choose Rotor.rotorIII initialRightRotorPosition
                         , reflector = Reflector.reflectorB
                         , plugboard = Plugboard.empty
                         }
+                  , leftRotorPosition = initialLeftRotorPosition
+                  , middleRotorPosition = initialMiddleRotorPosition
+                  , rightRotorPosition = initialRightRotorPosition
                   }
                 , Cmd.none
                 )
@@ -66,20 +87,23 @@ view model =
         , Html.div
             []
             [ Html.label [] [ Html.text "Rotor 1" ]
-            , Html.select [ Events.onInput LeftRotorChanged ]
+            , Html.select [ Events.onInput (RotorChanged LeftRotor) ]
                 (rotorOptions model.enigma.leftRotor)
+            , viewRotorPosition model.leftRotorPosition (RotorPositionChanged LeftRotor)
             ]
         , Html.div
             []
             [ Html.label [] [ Html.text "Rotor 2" ]
-            , Html.select [ Events.onInput MiddleRotorChanged ]
+            , Html.select [ Events.onInput (RotorChanged MiddleRotor) ]
                 (rotorOptions model.enigma.middleRotor)
+            , viewRotorPosition model.middleRotorPosition (RotorPositionChanged MiddleRotor)
             ]
         , Html.div
             []
             [ Html.label [] [ Html.text "Rotor 3" ]
-            , Html.select [ Events.onInput RightRotorChanged ]
+            , Html.select [ Events.onInput (RotorChanged RightRotor) ]
                 (rotorOptions model.enigma.rightRotor)
+            , viewRotorPosition model.rightRotorPosition (RotorPositionChanged RightRotor)
             ]
         , Html.div
             []
@@ -127,6 +151,18 @@ reflectorOptions chosenOne =
         Reflector.allReflectors
 
 
+viewRotorPosition : Int -> (String -> msg) -> Html msg
+viewRotorPosition position onInput =
+    Html.input
+        [ Attrs.type_ "number"
+        , Attrs.min "1"
+        , Attrs.max "26"
+        , Attrs.value (String.fromInt position)
+        , Events.onInput onInput
+        ]
+        []
+
+
 decorateOutput : String -> String
 decorateOutput output =
     String.toList output
@@ -136,71 +172,135 @@ decorateOutput output =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ enigma } as model) =
+update msg model =
     case msg of
         InputChanged value ->
             ( { model | input = value }, Cmd.none )
 
-        LeftRotorChanged chosen ->
-            let
-                updatedModel =
-                    case Rotor.chooseFromString chosen 0 of
-                        Just newRotor ->
-                            let
-                                updatedEnigma =
-                                    { enigma | leftRotor = newRotor }
-                            in
-                            { model | enigma = updatedEnigma }
+        RotorChanged LeftRotor chosen ->
+            ( updateEnigma
+                (\enigma ->
+                    case Rotor.chooseFromString chosen model.leftRotorPosition of
+                        Just new ->
+                            { enigma | leftRotor = new }
 
                         Nothing ->
-                            model
-            in
-            ( updatedModel, Cmd.none )
+                            enigma
+                )
+                model
+            , Cmd.none
+            )
 
-        MiddleRotorChanged chosen ->
-            let
-                updatedModel =
-                    case Rotor.chooseFromString chosen 0 of
-                        Just newRotor ->
-                            let
-                                updatedEnigma =
-                                    { enigma | middleRotor = newRotor }
-                            in
-                            { model | enigma = updatedEnigma }
+        RotorChanged MiddleRotor chosen ->
+            ( updateEnigma
+                (\enigma ->
+                    case Rotor.chooseFromString chosen model.middleRotorPosition of
+                        Just new ->
+                            { enigma | middleRotor = new }
 
                         Nothing ->
-                            model
-            in
-            ( updatedModel, Cmd.none )
+                            enigma
+                )
+                model
+            , Cmd.none
+            )
 
-        RightRotorChanged chosen ->
-            let
-                updatedModel =
-                    case Rotor.chooseFromString chosen 0 of
-                        Just newRotor ->
-                            let
-                                updatedEnigma =
-                                    { enigma | rightRotor = newRotor }
-                            in
-                            { model | enigma = updatedEnigma }
+        RotorChanged RightRotor chosen ->
+            ( updateEnigma
+                (\enigma ->
+                    case Rotor.chooseFromString chosen model.rightRotorPosition of
+                        Just new ->
+                            { enigma | rightRotor = new }
 
                         Nothing ->
-                            model
-            in
-            ( updatedModel, Cmd.none )
+                            enigma
+                )
+                model
+            , Cmd.none
+            )
+
+        RotorPositionChanged LeftRotor new ->
+            ( case String.toInt new of
+                Just v ->
+                    let
+                        updatedModel =
+                            updateEnigma
+                                (\enigma ->
+                                    { enigma
+                                        | leftRotor =
+                                            Rotor.choose enigma.leftRotor.rotor v
+                                    }
+                                )
+                                model
+                    in
+                    { updatedModel | leftRotorPosition = v }
+
+                Nothing ->
+                    model
+            , Cmd.none
+            )
+
+        RotorPositionChanged MiddleRotor new ->
+            ( case String.toInt new of
+                Just v ->
+                    let
+                        updatedModel =
+                            updateEnigma
+                                (\enigma ->
+                                    { enigma
+                                        | middleRotor =
+                                            Rotor.choose enigma.middleRotor.rotor v
+                                    }
+                                )
+                                model
+                    in
+                    { updatedModel | middleRotorPosition = v }
+
+                Nothing ->
+                    model
+            , Cmd.none
+            )
+
+        RotorPositionChanged RightRotor new ->
+            ( case String.toInt new of
+                Just v ->
+                    let
+                        updatedModel =
+                            updateEnigma
+                                (\enigma ->
+                                    { enigma
+                                        | rightRotor =
+                                            Rotor.choose enigma.rightRotor.rotor v
+                                    }
+                                )
+                                model
+                    in
+                    { updatedModel | rightRotorPosition = v }
+
+                Nothing ->
+                    model
+            , Cmd.none
+            )
 
         ReflectorChanged chosen ->
-            let
-                updatedModel =
+            ( updateEnigma
+                (\enigma ->
                     case Dict.get chosen Reflector.reflectorsByName of
                         Just newReflector ->
-                            let
-                                updatedEnigma =
-                                    { enigma | reflector = newReflector }
-                            in
-                            { model | enigma = updatedEnigma }
+                            { enigma | reflector = newReflector }
 
                         Nothing ->
-                            model
-            in
-            ( updatedModel, Cmd.none )
+                            enigma
+                )
+                model
+            , Cmd.none
+            )
+
+
+
+-- Helpers
+
+
+updateEnigma : (Enigma -> Enigma) -> Model -> Model
+updateEnigma fun model =
+    { model | enigma = fun model.enigma }
