@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Browser
+import Dict
 import Enigma exposing (Enigma)
 import Html exposing (Html)
 import Html.Attributes as Attrs
@@ -22,6 +23,7 @@ type Msg
     | LeftRotorChanged String
     | MiddleRotorChanged String
     | RightRotorChanged String
+    | ReflectorChanged String
 
 
 main : Program () Model Msg
@@ -79,6 +81,12 @@ view model =
             , Html.select [ Events.onInput RightRotorChanged ]
                 (rotorOptions model.enigma.rightRotor)
             ]
+        , Html.div
+            []
+            [ Html.label [] [ Html.text "Reflector" ]
+            , Html.select [ Events.onInput ReflectorChanged ]
+                (reflectorOptions model.enigma.reflector)
+            ]
         , Html.p [ Attrs.class "encoded" ] [ Html.text (decorateOutput encoded) ]
         ]
 
@@ -101,10 +109,28 @@ rotorOptions chosenOne =
         Rotor.allRotors
 
 
+reflectorOptions : Reflector -> List (Html msg)
+reflectorOptions chosenOne =
+    List.map
+        (\reflector ->
+            let
+                selectedAttrs =
+                    if chosenOne == reflector then
+                        [ Attrs.selected True ]
+
+                    else
+                        []
+            in
+            Html.option (Attrs.value reflector.name :: selectedAttrs)
+                [ Html.text reflector.name ]
+        )
+        Reflector.allReflectors
+
+
 decorateOutput : String -> String
 decorateOutput output =
     String.toList output
-        |> List.Extra.greedyGroupsOf 4
+        |> List.Extra.greedyGroupsOf 5
         |> List.map String.fromList
         |> String.join " "
 
@@ -155,6 +181,22 @@ update msg ({ enigma } as model) =
                             let
                                 updatedEnigma =
                                     { enigma | rightRotor = newRotor }
+                            in
+                            { model | enigma = updatedEnigma }
+
+                        Nothing ->
+                            model
+            in
+            ( updatedModel, Cmd.none )
+
+        ReflectorChanged chosen ->
+            let
+                updatedModel =
+                    case Dict.get chosen Reflector.reflectorsByName of
+                        Just newReflector ->
+                            let
+                                updatedEnigma =
+                                    { enigma | reflector = newReflector }
                             in
                             { model | enigma = updatedEnigma }
 

@@ -3,8 +3,8 @@ module Rotor exposing
     , ChosenRotor, choose, chooseFromString
     , atNotch, turn
     , forward, backward
-    , rotorI, rotorII, rotorIII
     , allRotors
+    , rotorI, rotorII, rotorIII, rotorIV, rotorV, rotorVI, rotorVII
     )
 
 {-| The Rotor!
@@ -35,7 +35,8 @@ then advance the next rotor.
 
 # Known rotors
 
-@docs rotorI, rotorII, rotorIII
+@docs allRotors
+@docs rotorI, rotorII, rotorIII, rotorIV, rotorV, rotorVI, rotorVII, rotorVIII
 
 -}
 
@@ -84,9 +85,57 @@ rotorIII =
     }
 
 
+rotorIV : Rotor
+rotorIV =
+    { name = "IV"
+    , mapping = RotorMapping.fromString "ESOVPZJAYQUIRHXLNFTGKDCMWB"
+    , notches = Set.fromList [ 'J' ]
+    }
+
+
+rotorV : Rotor
+rotorV =
+    { name = "V"
+    , mapping = RotorMapping.fromString "VZBRGITYUPSDNHLXAWMJQOFECK"
+    , notches = Set.fromList [ 'Z' ]
+    }
+
+
+rotorVI : Rotor
+rotorVI =
+    { name = "VI"
+    , mapping = RotorMapping.fromString "JPGVOUMFYQBENHZRDKASXLICTW"
+    , notches = Set.fromList [ 'Z', 'M' ]
+    }
+
+
+rotorVII : Rotor
+rotorVII =
+    { name = "VII"
+    , mapping = RotorMapping.fromString "NZJHGRCXMYSWBOUFAIVLPEKQDT"
+    , notches = Set.fromList [ 'Z', 'M' ]
+    }
+
+
+rotorVIII : Rotor
+rotorVIII =
+    { name = "VIII"
+    , mapping = RotorMapping.fromString "FKQHTLXOCBJSPDZRAMEWNIUYGV"
+    , notches = Set.fromList [ 'Z', 'M' ]
+    }
+
+
 allRotors : List Rotor
 allRotors =
-    [ rotorI, rotorII, rotorIII ]
+    [ rotorI
+    , rotorII
+    , rotorIII
+    , rotorIV
+    , rotorV
+    , rotorVI
+    , rotorVII
+    , rotorVIII
+    ]
 
 
 rotorsByName : Dict String Rotor
