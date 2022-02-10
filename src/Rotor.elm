@@ -1,8 +1,10 @@
 module Rotor exposing
-    ( Rotor(..)
+    ( Rotor
+    , ChosenRotor, choose, chooseFromString
     , atNotch, turn
     , forward, backward
     , rotorI, rotorII, rotorIII
+    , allRotors
     )
 
 {-| The Rotor!
@@ -22,6 +24,7 @@ then advance the next rotor.
 # Definition
 
 @docs Rotor
+@docs ChosenRotor, choose, chooseFromString
 
 
 # Interact with rotors
@@ -36,73 +39,105 @@ then advance the next rotor.
 
 -}
 
+import Dict exposing (Dict)
 import RotorMapping exposing (RotorMapping)
 import Set exposing (Set)
 
 
-type Rotor
-    = Rotor
-        { mapping : RotorMapping
-        , notches : Set Char
-        , position : Int
-        }
+type alias Rotor =
+    { name : String
+    , mapping : RotorMapping
+    , notches : Set Char
+    }
 
 
-rotorI : Int -> Rotor
-rotorI position =
-    Rotor
-        { mapping = RotorMapping.fromString "EKMFLGDQVZNTOWYHXUSPAIBRCJ"
-        , notches = Set.fromList [ 'Q' ]
-        , position = position
-        }
+{-| When we choose to use a rotor and we position it in the machine,
+we need to track the rotor position.
+-}
+type alias ChosenRotor =
+    { rotor : Rotor
+    , position : Int
+    }
 
 
-rotorII : Int -> Rotor
-rotorII position =
-    Rotor
-        { mapping = RotorMapping.fromString "AJDKSIRUXBLHWTMCQGZNPYFVOE"
-        , notches = Set.fromList [ 'E' ]
-        , position = position
-        }
+rotorI : Rotor
+rotorI =
+    { name = "I"
+    , mapping = RotorMapping.fromString "EKMFLGDQVZNTOWYHXUSPAIBRCJ"
+    , notches = Set.fromList [ 'Q' ]
+    }
 
 
-rotorIII : Int -> Rotor
-rotorIII position =
-    Rotor
-        { mapping = RotorMapping.fromString "BDFHJLCPRTXVZNYEIWGAKMUSQO"
-        , notches = Set.fromList [ 'V' ]
-        , position = position
-        }
+rotorII : Rotor
+rotorII =
+    { name = "II"
+    , mapping = RotorMapping.fromString "AJDKSIRUXBLHWTMCQGZNPYFVOE"
+    , notches = Set.fromList [ 'E' ]
+    }
 
 
-atNotch : Rotor -> Bool
-atNotch (Rotor { notches, position }) =
-    Set.member (Char.fromCode (position + 65)) notches
+rotorIII : Rotor
+rotorIII =
+    { name = "III"
+    , mapping = RotorMapping.fromString "BDFHJLCPRTXVZNYEIWGAKMUSQO"
+    , notches = Set.fromList [ 'V' ]
+    }
 
 
-turn : Rotor -> Rotor
-turn (Rotor ({ position } as info)) =
-    Rotor { info | position = modBy 26 (position + 1) }
+allRotors : List Rotor
+allRotors =
+    [ rotorI, rotorII, rotorIII ]
 
 
-forward : Rotor -> Int -> Int
+rotorsByName : Dict String Rotor
+rotorsByName =
+    List.map
+        (\rotor -> ( rotor.name, rotor ))
+        allRotors
+        |> Dict.fromList
+
+
+choose : Rotor -> Int -> ChosenRotor
+choose rotor position =
+    { rotor = rotor
+    , position = position
+    }
+
+
+chooseFromString : String -> Int -> Maybe ChosenRotor
+chooseFromString str position =
+    Dict.get str rotorsByName
+        |> Maybe.map (\rotor -> choose rotor position)
+
+
+atNotch : ChosenRotor -> Bool
+atNotch { rotor, position } =
+    Set.member (Char.fromCode (position + 65)) rotor.notches
+
+
+turn : ChosenRotor -> ChosenRotor
+turn ({ position } as info) =
+    { info | position = modBy 26 (position + 1) }
+
+
+forward : ChosenRotor -> Int -> Int
 forward rotor value =
     encipher RotorMapping.forward rotor value
 
 
-backward : Rotor -> Int -> Int
+backward : ChosenRotor -> Int -> Int
 backward rotor value =
     encipher RotorMapping.backward rotor value
 
 
-encipher : (RotorMapping -> Int -> Int) -> Rotor -> Int -> Int
-encipher fn (Rotor { mapping, position }) value =
+encipher : (RotorMapping -> Int -> Int) -> ChosenRotor -> Int -> Int
+encipher fn { rotor, position } value =
     let
         addShift v =
             modBy 26 (v + position)
 
         applyMapping v =
-            fn mapping v
+            fn rotor.mapping v
 
         removeShift v =
             modBy 26 (v - position)

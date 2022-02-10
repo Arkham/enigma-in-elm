@@ -1,7 +1,8 @@
-module Enigma exposing (Enigma, encodeString, makeOne)
+module Enigma exposing (Enigma, encodeString)
 
+import Plugboard exposing (Plugboard)
 import Reflector exposing (Reflector)
-import Rotor exposing (Rotor)
+import Rotor exposing (ChosenRotor)
 
 
 
@@ -20,64 +21,45 @@ import Rotor exposing (Rotor)
 -}
 
 
-type Plugboard
-    = Plugboard (List ( Char, Char ))
-
-
-type Enigma
-    = Enigma
-        { leftRotor : Rotor
-        , middleRotor : Rotor
-        , rightRotor : Rotor
-        , reflector : Reflector
-        , plugboard : Plugboard
-        }
-
-
-makeOne : Enigma
-makeOne =
-    Enigma
-        { leftRotor = Rotor.rotorI 1
-        , middleRotor = Rotor.rotorII 0
-        , rightRotor = Rotor.rotorIII 0
-        , reflector = Reflector.reflectorB
-        , plugboard = Plugboard []
-        }
+type alias Enigma =
+    { leftRotor : ChosenRotor
+    , middleRotor : ChosenRotor
+    , rightRotor : ChosenRotor
+    , reflector : Reflector
+    , plugboard : Plugboard
+    }
 
 
 step : Enigma -> Enigma
-step (Enigma ({ leftRotor, middleRotor, rightRotor } as info)) =
+step ({ leftRotor, middleRotor, rightRotor } as info) =
     case
         ( Rotor.atNotch middleRotor
         , Rotor.atNotch rightRotor
         )
     of
         ( True, _ ) ->
-            Enigma
-                { info
-                    | middleRotor = Rotor.turn middleRotor
-                    , leftRotor = Rotor.turn leftRotor
-                    , rightRotor = Rotor.turn rightRotor
-                }
+            { info
+                | middleRotor = Rotor.turn middleRotor
+                , leftRotor = Rotor.turn leftRotor
+                , rightRotor = Rotor.turn rightRotor
+            }
 
         ( _, True ) ->
-            Enigma
-                { info
-                    | middleRotor = Rotor.turn middleRotor
-                    , rightRotor = Rotor.turn rightRotor
-                }
+            { info
+                | middleRotor = Rotor.turn middleRotor
+                , rightRotor = Rotor.turn rightRotor
+            }
 
         _ ->
-            Enigma
-                { info
-                    | rightRotor = Rotor.turn rightRotor
-                }
+            { info
+                | rightRotor = Rotor.turn rightRotor
+            }
 
 
 encode : Char -> Enigma -> ( Char, Enigma )
 encode input enigma =
     let
-        ((Enigma { leftRotor, middleRotor, rightRotor, reflector }) as stepped) =
+        ({ leftRotor, middleRotor, rightRotor, reflector } as stepped) =
             step enigma
     in
     ( input
