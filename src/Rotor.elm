@@ -53,11 +53,14 @@ type alias Rotor =
 
 
 {-| When we choose to use a rotor and we position it in the machine,
-we need to track the rotor position.
+we need to track the rotor position. Furthermore, each rotor can be
+set up using a ring setting pin that offsets the displayed letter
+from the actual configuration of the rotor.
 -}
 type alias ChosenRotor =
     { rotor : Rotor
     , position : Int
+    , setting : Int
     }
 
 
@@ -149,20 +152,21 @@ rotorsByName =
 {-| Choose a rotor to put in the enigma machine. Since there was no computing
 they used to use 1-based indexes.
 -}
-choose : Rotor -> Int -> ChosenRotor
-choose rotor position =
+choose : Rotor -> Int -> Int -> ChosenRotor
+choose rotor position setting =
     { rotor = rotor
     , position = position - 1
+    , setting = setting - 1
     }
 
 
 {-| Choose a rotor to put in the enigma machine. Since there was no computing
 they used to use 1-based indexes.
 -}
-chooseFromString : String -> Int -> Maybe ChosenRotor
-chooseFromString str position =
+chooseFromString : String -> Int -> Int -> Maybe ChosenRotor
+chooseFromString str position setting =
     Dict.get str rotorsByName
-        |> Maybe.map (\rotor -> choose rotor position)
+        |> Maybe.map (\rotor -> choose rotor position setting)
 
 
 atNotch : ChosenRotor -> Bool
@@ -186,16 +190,19 @@ backward rotor value =
 
 
 encipher : (RotorMapping -> Int -> Int) -> ChosenRotor -> Int -> Int
-encipher fn { rotor, position } value =
+encipher fn { rotor, position, setting } value =
     let
+        shift =
+            position - setting
+
         addShift v =
-            modBy 26 (v + position)
+            modBy 26 (v + shift)
 
         applyMapping v =
             fn rotor.mapping v
 
         removeShift v =
-            modBy 26 (v - position)
+            modBy 26 (v - shift)
     in
     value
         |> addShift

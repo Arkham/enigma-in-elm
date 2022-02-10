@@ -16,8 +16,11 @@ type alias Model =
     { input : String
     , enigma : Enigma
     , leftRotorPosition : Int
+    , leftRotorSetting : Int
     , middleRotorPosition : Int
+    , middleRotorSetting : Int
     , rightRotorPosition : Int
+    , rightRotorSetting : Int
     }
 
 
@@ -31,35 +34,39 @@ type Msg
     = InputChanged String
     | RotorChanged WhichRotor String
     | RotorPositionChanged WhichRotor String
+    | RingSettingChanged WhichRotor String
     | ReflectorChanged String
 
 
 main : Program () Model Msg
 main =
     let
-        initialLeftRotorPosition =
-            1
+        ( leftRotorPosition, leftRotorSetting ) =
+            ( 1, 1 )
 
-        initialMiddleRotorPosition =
-            1
+        ( middleRotorPosition, middleRotorSetting ) =
+            ( 1, 1 )
 
-        initialRightRotorPosition =
-            1
+        ( rightRotorPosition, rightRotorSetting ) =
+            ( 1, 1 )
     in
     Browser.element
         { init =
             \_ ->
                 ( { input = "Hello darkness my old friend"
                   , enigma =
-                        { leftRotor = Rotor.choose Rotor.rotorI initialLeftRotorPosition
-                        , middleRotor = Rotor.choose Rotor.rotorII initialMiddleRotorPosition
-                        , rightRotor = Rotor.choose Rotor.rotorIII initialRightRotorPosition
+                        { leftRotor = Rotor.choose Rotor.rotorI leftRotorPosition leftRotorSetting
+                        , middleRotor = Rotor.choose Rotor.rotorII middleRotorPosition middleRotorSetting
+                        , rightRotor = Rotor.choose Rotor.rotorIII rightRotorPosition rightRotorSetting
                         , reflector = Reflector.reflectorB
                         , plugboard = Plugboard.empty
                         }
-                  , leftRotorPosition = initialLeftRotorPosition
-                  , middleRotorPosition = initialMiddleRotorPosition
-                  , rightRotorPosition = initialRightRotorPosition
+                  , leftRotorPosition = leftRotorPosition
+                  , leftRotorSetting = leftRotorSetting
+                  , middleRotorPosition = middleRotorPosition
+                  , middleRotorSetting = middleRotorSetting
+                  , rightRotorPosition = rightRotorPosition
+                  , rightRotorSetting = rightRotorSetting
                   }
                 , Cmd.none
                 )
@@ -90,6 +97,7 @@ view model =
             , Html.select [ Events.onInput (RotorChanged LeftRotor) ]
                 (rotorOptions model.enigma.leftRotor)
             , viewRotorPosition model.leftRotorPosition (RotorPositionChanged LeftRotor)
+            , viewRingSetting model.leftRotorSetting (RingSettingChanged LeftRotor)
             ]
         , Html.div
             []
@@ -97,6 +105,7 @@ view model =
             , Html.select [ Events.onInput (RotorChanged MiddleRotor) ]
                 (rotorOptions model.enigma.middleRotor)
             , viewRotorPosition model.middleRotorPosition (RotorPositionChanged MiddleRotor)
+            , viewRingSetting model.middleRotorSetting (RingSettingChanged MiddleRotor)
             ]
         , Html.div
             []
@@ -104,6 +113,7 @@ view model =
             , Html.select [ Events.onInput (RotorChanged RightRotor) ]
                 (rotorOptions model.enigma.rightRotor)
             , viewRotorPosition model.rightRotorPosition (RotorPositionChanged RightRotor)
+            , viewRingSetting model.rightRotorSetting (RingSettingChanged RightRotor)
             ]
         , Html.div
             []
@@ -163,6 +173,18 @@ viewRotorPosition position onInput =
         []
 
 
+viewRingSetting : Int -> (String -> msg) -> Html msg
+viewRingSetting setting onInput =
+    Html.input
+        [ Attrs.type_ "number"
+        , Attrs.min "1"
+        , Attrs.max "26"
+        , Attrs.value (String.fromInt setting)
+        , Events.onInput onInput
+        ]
+        []
+
+
 decorateOutput : String -> String
 decorateOutput output =
     String.toList output
@@ -180,7 +202,12 @@ update msg model =
         RotorChanged LeftRotor chosen ->
             ( updateEnigma
                 (\enigma ->
-                    case Rotor.chooseFromString chosen model.leftRotorPosition of
+                    case
+                        Rotor.chooseFromString
+                            chosen
+                            model.leftRotorPosition
+                            model.leftRotorSetting
+                    of
                         Just new ->
                             { enigma | leftRotor = new }
 
@@ -194,7 +221,12 @@ update msg model =
         RotorChanged MiddleRotor chosen ->
             ( updateEnigma
                 (\enigma ->
-                    case Rotor.chooseFromString chosen model.middleRotorPosition of
+                    case
+                        Rotor.chooseFromString
+                            chosen
+                            model.middleRotorPosition
+                            model.middleRotorSetting
+                    of
                         Just new ->
                             { enigma | middleRotor = new }
 
@@ -208,7 +240,12 @@ update msg model =
         RotorChanged RightRotor chosen ->
             ( updateEnigma
                 (\enigma ->
-                    case Rotor.chooseFromString chosen model.rightRotorPosition of
+                    case
+                        Rotor.chooseFromString
+                            chosen
+                            model.rightRotorPosition
+                            model.rightRotorSetting
+                    of
                         Just new ->
                             { enigma | rightRotor = new }
 
@@ -228,7 +265,10 @@ update msg model =
                                 (\enigma ->
                                     { enigma
                                         | leftRotor =
-                                            Rotor.choose enigma.leftRotor.rotor v
+                                            Rotor.choose
+                                                enigma.leftRotor.rotor
+                                                v
+                                                model.leftRotorSetting
                                     }
                                 )
                                 model
@@ -249,7 +289,10 @@ update msg model =
                                 (\enigma ->
                                     { enigma
                                         | middleRotor =
-                                            Rotor.choose enigma.middleRotor.rotor v
+                                            Rotor.choose
+                                                enigma.middleRotor.rotor
+                                                v
+                                                model.middleRotorSetting
                                     }
                                 )
                                 model
@@ -270,12 +313,87 @@ update msg model =
                                 (\enigma ->
                                     { enigma
                                         | rightRotor =
-                                            Rotor.choose enigma.rightRotor.rotor v
+                                            Rotor.choose
+                                                enigma.rightRotor.rotor
+                                                v
+                                                model.rightRotorSetting
                                     }
                                 )
                                 model
                     in
                     { updatedModel | rightRotorPosition = v }
+
+                Nothing ->
+                    model
+            , Cmd.none
+            )
+
+        RingSettingChanged LeftRotor new ->
+            ( case String.toInt new of
+                Just v ->
+                    let
+                        updatedModel =
+                            updateEnigma
+                                (\enigma ->
+                                    { enigma
+                                        | leftRotor =
+                                            Rotor.choose
+                                                enigma.leftRotor.rotor
+                                                model.leftRotorPosition
+                                                v
+                                    }
+                                )
+                                model
+                    in
+                    { updatedModel | leftRotorSetting = v }
+
+                Nothing ->
+                    model
+            , Cmd.none
+            )
+
+        RingSettingChanged MiddleRotor new ->
+            ( case String.toInt new of
+                Just v ->
+                    let
+                        updatedModel =
+                            updateEnigma
+                                (\enigma ->
+                                    { enigma
+                                        | middleRotor =
+                                            Rotor.choose
+                                                enigma.middleRotor.rotor
+                                                model.middleRotorPosition
+                                                v
+                                    }
+                                )
+                                model
+                    in
+                    { updatedModel | middleRotorSetting = v }
+
+                Nothing ->
+                    model
+            , Cmd.none
+            )
+
+        RingSettingChanged RightRotor new ->
+            ( case String.toInt new of
+                Just v ->
+                    let
+                        updatedModel =
+                            updateEnigma
+                                (\enigma ->
+                                    { enigma
+                                        | rightRotor =
+                                            Rotor.choose
+                                                enigma.rightRotor.rotor
+                                                model.rightRotorPosition
+                                                v
+                                    }
+                                )
+                                model
+                    in
+                    { updatedModel | rightRotorSetting = v }
 
                 Nothing ->
                     model
