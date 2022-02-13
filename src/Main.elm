@@ -7,6 +7,7 @@ import Html exposing (Html)
 import Html.Attributes as Attrs
 import Html.Events as Events
 import List.Extra
+import Parser
 import Plugboard exposing (Plugboard)
 import Reflector exposing (Reflector)
 import Rotor exposing (ChosenRotor, Rotor)
@@ -21,6 +22,7 @@ type alias Model =
     , middleRotorSetting : Int
     , rightRotorPosition : Int
     , rightRotorSetting : Int
+    , plugboardInput : String
     }
 
 
@@ -36,6 +38,7 @@ type Msg
     | RotorPositionChanged WhichRotor String
     | RingSettingChanged WhichRotor String
     | ReflectorChanged String
+    | PlugboardChanged String
 
 
 main : Program () Model Msg
@@ -67,6 +70,7 @@ main =
                   , middleRotorSetting = middleRotorSetting
                   , rightRotorPosition = rightRotorPosition
                   , rightRotorSetting = rightRotorSetting
+                  , plugboardInput = ""
                   }
                 , Cmd.none
                 )
@@ -120,6 +124,11 @@ view model =
             [ Html.label [] [ Html.text "Reflector" ]
             , Html.select [ Events.onInput ReflectorChanged ]
                 (reflectorOptions model.enigma.reflector)
+            ]
+        , Html.div
+            []
+            [ Html.label [] [ Html.text "Plugboard" ]
+            , Html.input [ Attrs.value model.plugboardInput, Events.onInput PlugboardChanged ] []
             ]
         , Html.p [ Attrs.class "encoded" ] [ Html.text (decorateOutput encoded) ]
         ]
@@ -413,6 +422,22 @@ update msg model =
                 model
             , Cmd.none
             )
+
+        PlugboardChanged input ->
+            let
+                updatedModel =
+                    updateEnigma
+                        (\enigma ->
+                            case Parser.run Plugboard.parser input of
+                                Ok newPlugboard ->
+                                    { enigma | plugboard = newPlugboard }
+
+                                _ ->
+                                    enigma
+                        )
+                        model
+            in
+            ( { updatedModel | plugboardInput = input }, Cmd.none )
 
 
 

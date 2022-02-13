@@ -59,19 +59,21 @@ step ({ leftRotor, middleRotor, rightRotor } as info) =
 encode : Char -> Enigma -> ( Char, Enigma )
 encode input enigma =
     let
-        ({ leftRotor, middleRotor, rightRotor, reflector } as stepped) =
+        ({ leftRotor, middleRotor, rightRotor } as stepped) =
             step enigma
     in
     ( input
+        |> Plugboard.swap enigma.plugboard
         |> (\e -> Char.toCode e - 65)
         |> Rotor.forward rightRotor
         |> Rotor.forward middleRotor
         |> Rotor.forward leftRotor
-        |> Reflector.reflect reflector
+        |> Reflector.reflect enigma.reflector
         |> Rotor.backward leftRotor
         |> Rotor.backward middleRotor
         |> Rotor.backward rightRotor
         |> (\e -> Char.fromCode (e + 65))
+        |> Plugboard.swap enigma.plugboard
     , stepped
     )
 
