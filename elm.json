@@ -11,7 +11,8 @@
             "elm/html": "1.0.0",
             "elm/parser": "1.1.0",
             "elm-community/dict-extra": "2.4.0",
-            "elm-community/list-extra": "8.5.2"
+            "elm-community/list-extra": "8.5.2",
+            "turboMaCk/any-dict": "2.6.0"
         },
         "indirect": {
             "elm/json": "1.1.3",

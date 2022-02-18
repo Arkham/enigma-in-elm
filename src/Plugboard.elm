@@ -1,6 +1,7 @@
-module Plugboard exposing (Plugboard, empty, parser, swap)
+module Plugboard exposing (Plugboard, empty, parse, swap)
 
 import Dict exposing (Dict)
+import List.Extra
 import Parser as P exposing ((|.), (|=), Parser, Step)
 
 
@@ -13,58 +14,90 @@ empty =
     Plugboard Dict.empty
 
 
-fromPairs : List ( Char, Char ) -> Plugboard
-fromPairs pairs =
-    Plugboard <|
-        List.foldl
-            (\( src, dst ) acc ->
-                acc
-                    |> Dict.insert src dst
-                    |> Dict.insert dst src
-            )
-            Dict.empty
-            pairs
-
-
 swap : Plugboard -> Char -> Char
 swap (Plugboard mapping) input =
     Dict.get input mapping
         |> Maybe.withDefault input
 
 
+
+-- Input parser
+
+
+parse : String -> Result (List String) Plugboard
+parse input =
+    case P.run parser input of
+        Ok plugboard ->
+            Ok plugboard
+
+        Err errors ->
+            errors
+                |> List.filterMap errorToString
+                |> List.sort
+                |> List.Extra.unique
+                |> Err
+
+
+errorToString : P.DeadEnd -> Maybe String
+errorToString { problem } =
+    case problem of
+        P.Problem string ->
+            Just string
+
+        _ ->
+            Just "I'm expecting a list of pairs of letters to be swapped (e.g. 'ab cd ef')"
+
+
 parser : Parser Plugboard
 parser =
-    P.map fromPairs (P.loop [] parserHelp)
+    P.map Plugboard (P.loop Dict.empty parserHelp)
 
 
-type alias Pair =
-    ( Char, Char )
+type alias CharDict =
+    Dict Char Char
 
 
-pairParser : Parser Pair
-pairParser =
-    (P.getChompedString <|
-        P.succeed ()
-            |. P.chompIf Char.isAlpha
-            |. P.chompIf Char.isAlpha
-    )
-        |> P.andThen
-            (\parsed ->
-                case String.toList parsed of
-                    [ src, dst ] ->
-                        P.succeed ( Char.toUpper src, Char.toUpper dst )
+pairParser : CharDict -> Parser CharDict
+pairParser acc =
+    let
+        twoChars =
+            P.getChompedString <|
+                P.succeed ()
+                    |. P.chompIf Char.isAlpha
+                    |. P.chompIf Char.isAlpha
+    in
+    P.andThen
+        (\parsed ->
+            case String.toList (String.toUpper parsed) of
+                [ src, dst ] ->
+                    if src == dst || Dict.member src acc || Dict.member dst acc then
+                        P.problem "Pairs of letters to be swapped must be unique"
 
-                    _ ->
-                        P.problem "Did not find pair"
-            )
+                    else
+                        P.succeed
+                            (acc
+                                |> Dict.insert src dst
+                                |> Dict.insert dst src
+                            )
+
+                -- this should never happen
+                other ->
+                    P.problem ("I expected to find two characters, but instead I found: '" ++ parsed ++ "'")
+        )
+        twoChars
 
 
-parserHelp : List Pair -> Parser (Step (List Pair) (List Pair))
+parserHelp : CharDict -> Parser (Step CharDict CharDict)
 parserHelp acc =
     P.oneOf
-        [ P.succeed (\stmt -> P.Loop (stmt :: acc))
-            |= pairParser
-            |. P.spaces
+        [ P.succeed (\newAcc -> P.Loop newAcc)
+            |= pairParser acc
+            |. P.oneOf
+                [ P.succeed ()
+                    |. P.chompIf (\c -> c == ' ')
+                    |. P.spaces
+                , P.end
+                ]
         , P.succeed Plugboard
-            |> P.map (\_ -> P.Done (List.reverse acc))
+            |> P.map (\_ -> P.Done acc)
         ]

@@ -2,15 +2,19 @@ module Main exposing (main)
 
 import Browser
 import Dict
+import Dict.Any as AnyDict exposing (AnyDict)
 import Enigma exposing (Enigma)
 import Html exposing (Html)
 import Html.Attributes as Attrs
 import Html.Events as Events
 import List.Extra
-import Parser
 import Plugboard exposing (Plugboard)
 import Reflector exposing (Reflector)
 import Rotor exposing (ChosenRotor, Rotor)
+
+
+type alias ValidationErrors =
+    AnyDict String FormField (List String)
 
 
 type alias Model =
@@ -23,6 +27,7 @@ type alias Model =
     , rightRotorPosition : Int
     , rightRotorSetting : Int
     , plugboardInput : String
+    , validationErrors : ValidationErrors
     }
 
 
@@ -30,6 +35,21 @@ type WhichRotor
     = LeftRotor
     | MiddleRotor
     | RightRotor
+
+
+
+-- Validation logic
+
+
+type FormField
+    = PlugboardInput
+
+
+fieldToString : FormField -> String
+fieldToString field =
+    case field of
+        PlugboardInput ->
+            "PlugboardInput"
 
 
 type Msg
@@ -71,6 +91,7 @@ main =
                   , rightRotorPosition = rightRotorPosition
                   , rightRotorSetting = rightRotorSetting
                   , plugboardInput = ""
+                  , validationErrors = AnyDict.empty fieldToString
                   }
                 , Cmd.none
                 )
@@ -80,6 +101,8 @@ main =
         }
 
 
+{-| VIEW
+-}
 view : Model -> Html Msg
 view model =
     let
@@ -129,6 +152,7 @@ view model =
             []
             [ Html.label [] [ Html.text "Plugboard" ]
             , Html.input [ Attrs.value model.plugboardInput, Events.onInput PlugboardChanged ] []
+            , viewValidationErrors model.validationErrors PlugboardInput
             ]
         , Html.p [ Attrs.class "encoded" ] [ Html.text (decorateOutput encoded) ]
         ]
@@ -194,6 +218,17 @@ viewRingSetting setting onInput =
         []
 
 
+viewValidationErrors : ValidationErrors -> FormField -> Html msg
+viewValidationErrors validationErrors field =
+    case AnyDict.get field validationErrors |> Maybe.withDefault [] of
+        [] ->
+            Html.text ""
+
+        errors ->
+            Html.ul [] <|
+                List.map (\e -> Html.li [] [ Html.text e ]) errors
+
+
 decorateOutput : String -> String
 decorateOutput output =
     String.toList output
@@ -202,6 +237,8 @@ decorateOutput output =
         |> String.join " "
 
 
+{-| UPDATE
+-}
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -426,24 +463,28 @@ update msg model =
         PlugboardChanged input ->
             let
                 updatedModel =
-                    updateEnigma
-                        (\enigma ->
-                            case Parser.run Plugboard.parser input of
-                                Ok newPlugboard ->
+                    case Plugboard.parse input of
+                        Ok newPlugboard ->
+                            updateEnigma
+                                (\enigma ->
                                     { enigma | plugboard = newPlugboard }
+                                )
+                                { model
+                                    | validationErrors =
+                                        AnyDict.remove PlugboardInput model.validationErrors
+                                }
 
-                                _ ->
-                                    enigma
-                        )
-                        model
+                        Err errors ->
+                            { model
+                                | validationErrors =
+                                    AnyDict.insert PlugboardInput errors model.validationErrors
+                            }
             in
             ( { updatedModel | plugboardInput = input }, Cmd.none )
 
 
-
--- Helpers
-
-
+{-| HELPERS
+-}
 updateEnigma : (Enigma -> Enigma) -> Model -> Model
 updateEnigma fun model =
     { model | enigma = fun model.enigma }
