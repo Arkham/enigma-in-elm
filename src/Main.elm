@@ -119,7 +119,7 @@ view model =
             ]
             []
         , Html.div
-            []
+            [ Attrs.style "display" "flex" ]
             [ Html.label [] [ Html.text "Rotor 1" ]
             , Html.select [ Events.onInput (RotorChanged LeftRotor) ]
                 (rotorOptions model.enigma.leftRotor)
@@ -127,7 +127,7 @@ view model =
             , viewRingSetting model.leftRotorSetting (RingSettingChanged LeftRotor)
             ]
         , Html.div
-            []
+            [ Attrs.style "display" "flex" ]
             [ Html.label [] [ Html.text "Rotor 2" ]
             , Html.select [ Events.onInput (RotorChanged MiddleRotor) ]
                 (rotorOptions model.enigma.middleRotor)
@@ -135,7 +135,7 @@ view model =
             , viewRingSetting model.middleRotorSetting (RingSettingChanged MiddleRotor)
             ]
         , Html.div
-            []
+            [ Attrs.style "display" "flex" ]
             [ Html.label [] [ Html.text "Rotor 3" ]
             , Html.select [ Events.onInput (RotorChanged RightRotor) ]
                 (rotorOptions model.enigma.rightRotor)
@@ -196,26 +196,38 @@ reflectorOptions chosenOne =
 
 viewRotorPosition : Int -> (String -> msg) -> Html msg
 viewRotorPosition position onInput =
-    Html.input
-        [ Attrs.type_ "number"
-        , Attrs.min "1"
-        , Attrs.max "26"
-        , Attrs.value (String.fromInt position)
-        , Events.onInput onInput
+    Html.div []
+        [ Html.input
+            [ Attrs.type_ "number"
+            , Attrs.min "1"
+            , Attrs.max "26"
+            , Attrs.value (String.fromInt position)
+            , Events.onInput onInput
+            ]
+            []
+        , Html.span [] [ Html.text <| indexToLetter position ]
         ]
-        []
 
 
 viewRingSetting : Int -> (String -> msg) -> Html msg
 viewRingSetting setting onInput =
-    Html.input
-        [ Attrs.type_ "number"
-        , Attrs.min "1"
-        , Attrs.max "26"
-        , Attrs.value (String.fromInt setting)
-        , Events.onInput onInput
+    Html.div []
+        [ Html.input
+            [ Attrs.type_ "number"
+            , Attrs.min "1"
+            , Attrs.max "26"
+            , Attrs.value (String.fromInt setting)
+            , Events.onInput onInput
+            ]
+            []
+        , Html.span [] [ Html.text <| indexToLetter setting ]
         ]
-        []
+
+
+indexToLetter : Int -> String
+indexToLetter value =
+    Char.fromCode (value + 64)
+        |> String.fromChar
 
 
 viewValidationErrors : ValidationErrors -> FormField -> Html msg
@@ -303,7 +315,7 @@ update msg model =
             )
 
         RotorPositionChanged LeftRotor new ->
-            ( case String.toInt new of
+            ( case clampIndex new of
                 Just v ->
                     let
                         updatedModel =
@@ -327,7 +339,7 @@ update msg model =
             )
 
         RotorPositionChanged MiddleRotor new ->
-            ( case String.toInt new of
+            ( case clampIndex new of
                 Just v ->
                     let
                         updatedModel =
@@ -351,7 +363,7 @@ update msg model =
             )
 
         RotorPositionChanged RightRotor new ->
-            ( case String.toInt new of
+            ( case clampIndex new of
                 Just v ->
                     let
                         updatedModel =
@@ -375,7 +387,7 @@ update msg model =
             )
 
         RingSettingChanged LeftRotor new ->
-            ( case String.toInt new of
+            ( case clampIndex new of
                 Just v ->
                     let
                         updatedModel =
@@ -399,7 +411,7 @@ update msg model =
             )
 
         RingSettingChanged MiddleRotor new ->
-            ( case String.toInt new of
+            ( case clampIndex new of
                 Just v ->
                     let
                         updatedModel =
@@ -423,7 +435,7 @@ update msg model =
             )
 
         RingSettingChanged RightRotor new ->
-            ( case String.toInt new of
+            ( case clampIndex new of
                 Just v ->
                     let
                         updatedModel =
@@ -481,6 +493,13 @@ update msg model =
                             }
             in
             ( { updatedModel | plugboardInput = input }, Cmd.none )
+
+
+clampIndex : String -> Maybe Int
+clampIndex value =
+    value
+        |> String.toInt
+        |> Maybe.map (clamp 1 26)
 
 
 {-| HELPERS
