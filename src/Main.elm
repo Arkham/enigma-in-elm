@@ -72,6 +72,9 @@ main =
 
         ( rightRotorPosition, rightRotorSetting ) =
             ( 1, 1 )
+
+        initialPlugboard =
+            "ab cd ef gh"
     in
     Browser.element
         { init =
@@ -82,7 +85,13 @@ main =
                         , middleRotor = Rotor.choose Rotor.rotorII middleRotorPosition middleRotorSetting
                         , rightRotor = Rotor.choose Rotor.rotorIII rightRotorPosition rightRotorSetting
                         , reflector = Reflector.reflectorB
-                        , plugboard = Plugboard.empty
+                        , plugboard =
+                            case Plugboard.parse initialPlugboard of
+                                Ok new ->
+                                    new
+
+                                _ ->
+                                    Plugboard.empty
                         }
                   , leftRotorPosition = leftRotorPosition
                   , leftRotorSetting = leftRotorSetting
@@ -90,7 +99,7 @@ main =
                   , middleRotorSetting = middleRotorSetting
                   , rightRotorPosition = rightRotorPosition
                   , rightRotorSetting = rightRotorSetting
-                  , plugboardInput = ""
+                  , plugboardInput = initialPlugboard
                   , validationErrors = AnyDict.empty fieldToString
                   }
                 , Cmd.none
@@ -109,52 +118,67 @@ view model =
         ( encoded, _ ) =
             Enigma.encodeString model.input model.enigma
     in
-    Html.section []
-        [ Html.h1 [] [ Html.text "Enigma in Elm" ]
-        , Html.textarea
-            [ Attrs.cols 40
-            , Attrs.rows 10
-            , Attrs.value model.input
-            , Events.onInput InputChanged
+    Html.section [ Attrs.class "max-w-md xl:max-w-6xl mx-auto" ]
+        [ Html.h1 [ Attrs.class "text-6xl uppercase my-4" ] [ Html.text "Enigma" ]
+        , Html.div [ Attrs.class "flex flex-col space-y-6 xl:flex-row xl:space-y-0 xl:space-x-8" ]
+            [ Html.div [ Attrs.class "flex" ]
+                [ Html.textarea
+                    [ Attrs.class "resize-none"
+                    , Attrs.cols 40
+                    , Attrs.rows 10
+                    , Attrs.autofocus True
+                    , Attrs.value model.input
+                    , Events.onInput InputChanged
+                    ]
+                    []
+                ]
+            , Html.div [ Attrs.class "w-[260px] flex flex-col" ]
+                [ Html.div
+                    [ Attrs.class "grid grid-cols-3 border-b" ]
+                    [ viewRotorSelect "Rotor 1" model.enigma.leftRotor (RotorChanged LeftRotor)
+                    , viewRotorPosition model.leftRotorPosition (RotorPositionChanged LeftRotor)
+                    , viewRingSetting model.leftRotorSetting (RingSettingChanged LeftRotor)
+                    ]
+                , Html.div
+                    [ Attrs.class "grid grid-cols-3 border-b" ]
+                    [ viewRotorSelect "Rotor 2" model.enigma.middleRotor (RotorChanged MiddleRotor)
+                    , viewRotorPosition model.middleRotorPosition (RotorPositionChanged MiddleRotor)
+                    , viewRingSetting model.middleRotorSetting (RingSettingChanged MiddleRotor)
+                    ]
+                , Html.div
+                    [ Attrs.class "grid grid-cols-3 border-b" ]
+                    [ viewRotorSelect "Rotor 3" model.enigma.rightRotor (RotorChanged RightRotor)
+                    , viewRotorPosition model.rightRotorPosition (RotorPositionChanged RightRotor)
+                    , viewRingSetting model.rightRotorSetting (RingSettingChanged RightRotor)
+                    ]
+                , Html.div [ Attrs.class "flex flex-col py-3 border-b" ]
+                    [ Html.label
+                        [ Attrs.class "pl-3 uppercase text-xs text-neutral-400"
+                        ]
+                        [ Html.text "Reflector" ]
+                    , Html.select
+                        [ Attrs.class "border-0 py-0 font-semibold"
+                        , Events.onInput ReflectorChanged
+                        ]
+                        (reflectorOptions model.enigma.reflector)
+                    ]
+                , Html.div [ Attrs.class "flex flex-none flex-col pt-3 px-3" ]
+                    [ Html.label
+                        [ Attrs.class "uppercase text-xs text-neutral-400"
+                        ]
+                        [ Html.text "Plugboard" ]
+                    , Html.input
+                        [ Attrs.class "border-1 mt-1 p-1"
+                        , Attrs.type_ "text"
+                        , Attrs.value model.plugboardInput
+                        , Events.onInput PlugboardChanged
+                        ]
+                        []
+                    , viewValidationErrors model.validationErrors PlugboardInput
+                    ]
+                ]
+            , Html.div [ Attrs.class "w-[370px] font-semibold text-2xl border py-1 px-2 border-dotted" ] [ Html.text (decorateOutput encoded) ]
             ]
-            []
-        , Html.div
-            [ Attrs.style "display" "flex" ]
-            [ Html.label [] [ Html.text "Rotor 1" ]
-            , Html.select [ Events.onInput (RotorChanged LeftRotor) ]
-                (rotorOptions model.enigma.leftRotor)
-            , viewRotorPosition model.leftRotorPosition (RotorPositionChanged LeftRotor)
-            , viewRingSetting model.leftRotorSetting (RingSettingChanged LeftRotor)
-            ]
-        , Html.div
-            [ Attrs.style "display" "flex" ]
-            [ Html.label [] [ Html.text "Rotor 2" ]
-            , Html.select [ Events.onInput (RotorChanged MiddleRotor) ]
-                (rotorOptions model.enigma.middleRotor)
-            , viewRotorPosition model.middleRotorPosition (RotorPositionChanged MiddleRotor)
-            , viewRingSetting model.middleRotorSetting (RingSettingChanged MiddleRotor)
-            ]
-        , Html.div
-            [ Attrs.style "display" "flex" ]
-            [ Html.label [] [ Html.text "Rotor 3" ]
-            , Html.select [ Events.onInput (RotorChanged RightRotor) ]
-                (rotorOptions model.enigma.rightRotor)
-            , viewRotorPosition model.rightRotorPosition (RotorPositionChanged RightRotor)
-            , viewRingSetting model.rightRotorSetting (RingSettingChanged RightRotor)
-            ]
-        , Html.div
-            []
-            [ Html.label [] [ Html.text "Reflector" ]
-            , Html.select [ Events.onInput ReflectorChanged ]
-                (reflectorOptions model.enigma.reflector)
-            ]
-        , Html.div
-            []
-            [ Html.label [] [ Html.text "Plugboard" ]
-            , Html.input [ Attrs.value model.plugboardInput, Events.onInput PlugboardChanged ] []
-            , viewValidationErrors model.validationErrors PlugboardInput
-            ]
-        , Html.p [ Attrs.class "encoded" ] [ Html.text (decorateOutput encoded) ]
         ]
 
 
@@ -194,33 +218,56 @@ reflectorOptions chosenOne =
         Reflector.allReflectors
 
 
+viewRotorSelect : String -> ChosenRotor -> (String -> msg) -> Html msg
+viewRotorSelect label chosenOne onInput =
+    Html.div [ Attrs.class "flex flex-col border-r py-3" ]
+        [ Html.label
+            [ Attrs.class "pl-3 uppercase text-xs text-neutral-400"
+            ]
+            [ Html.text label ]
+        , Html.select
+            [ Attrs.class "border-0 py-0 font-semibold"
+            , Events.onInput onInput
+            ]
+            (rotorOptions chosenOne)
+        ]
+
+
 viewRotorPosition : Int -> (String -> msg) -> Html msg
 viewRotorPosition position onInput =
-    Html.div []
-        [ Html.input
-            [ Attrs.type_ "number"
+    Html.div [ Attrs.class "flex flex-col border-r py-3" ]
+        [ Html.label
+            [ Attrs.class "pl-3 uppercase text-xs text-neutral-400"
+            ]
+            [ Html.text <| "Position " ++ indexToLetter position ]
+        , Html.input
+            [ Attrs.class "border-0 py-0 font-semibold"
+            , Attrs.type_ "number"
             , Attrs.min "1"
             , Attrs.max "26"
             , Attrs.value (String.fromInt position)
             , Events.onInput onInput
             ]
             []
-        , Html.span [] [ Html.text <| indexToLetter position ]
         ]
 
 
 viewRingSetting : Int -> (String -> msg) -> Html msg
 viewRingSetting setting onInput =
-    Html.div []
-        [ Html.input
-            [ Attrs.type_ "number"
+    Html.div [ Attrs.class "flex flex-col py-3" ]
+        [ Html.label
+            [ Attrs.class "pl-3 uppercase text-xs text-neutral-400"
+            ]
+            [ Html.text <| "Setting " ++ indexToLetter setting ]
+        , Html.input
+            [ Attrs.class "border-0 py-0 font-semibold"
+            , Attrs.type_ "number"
             , Attrs.min "1"
             , Attrs.max "26"
             , Attrs.value (String.fromInt setting)
             , Events.onInput onInput
             ]
             []
-        , Html.span [] [ Html.text <| indexToLetter setting ]
         ]
 
 
@@ -238,7 +285,7 @@ viewValidationErrors validationErrors field =
 
         errors ->
             Html.ul [] <|
-                List.map (\e -> Html.li [] [ Html.text e ]) errors
+                List.map (\e -> Html.li [] [ Html.p [ Attrs.class "text-xs break-normal" ] [ Html.text e ] ]) errors
 
 
 decorateOutput : String -> String

@@ -4,7 +4,19 @@ module.exports = {
     './src/index.html'
   ],
   theme: {
-    extend: {},
+    // override focus ring color
+    extend: {
+      colors: {
+        blue: {
+          600: 'rgb(203 213 225)'
+        },
+        gray: {
+          500: 'rgb(229 231 235)'
+        }
+      }
+    }
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms')
+  ]
 }

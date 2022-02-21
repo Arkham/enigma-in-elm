@@ -45,7 +45,7 @@ errorToString { problem } =
             Just string
 
         _ ->
-            Just "I'm expecting a list of pairs of letters to be swapped (e.g. 'ab cd ef')"
+            Just "I'm expecting a list of pairs of letters to be swapped (e.g. 'ab cd ef')."
 
 
 parser : Parser Plugboard
@@ -71,7 +71,7 @@ pairParser acc =
             case String.toList (String.toUpper parsed) of
                 [ src, dst ] ->
                     if src == dst || Dict.member src acc || Dict.member dst acc then
-                        P.problem "Pairs of letters to be swapped must be unique"
+                        P.problem "Pairs of letters to be swapped must be unique."
 
                     else
                         P.succeed
