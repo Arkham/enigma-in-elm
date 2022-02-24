@@ -119,32 +119,38 @@ view model =
             Enigma.encodeString model.input model.enigma
     in
     Html.section [ Attrs.class "max-w-md xl:max-w-6xl mx-auto" ]
-        [ Html.h1 [ Attrs.class "text-6xl uppercase my-4" ] [ Html.text "Enigma" ]
-        , Html.div [ Attrs.class "grid grid-cols-1 xl:grid-cols-3 gap-4" ]
-            [ Html.textarea
-                [ Attrs.class "flex resize-none"
-                , Attrs.cols 40
-                , Attrs.rows 10
-                , Attrs.autofocus True
-                , Attrs.value model.input
-                , Events.onInput InputChanged
+        [ Html.h1 [ Attrs.class "relative left-[-4px] text-6xl uppercase my-4" ] [ Html.text "Enigma" ]
+        , Html.div [ Attrs.class "grid grid-cols-1 xl:grid-cols-3 gap-6" ]
+            [ Html.div [ Attrs.class "flex flex-col" ]
+                [ Html.label
+                    [ Attrs.class "font-semibold uppercase text-xs text-neutral-400"
+                    ]
+                    [ Html.text "Input" ]
+                , Html.textarea
+                    [ Attrs.class "flex-grow resize-none"
+                    , Attrs.cols 40
+                    , Attrs.rows 3
+                    , Attrs.autofocus True
+                    , Attrs.value model.input
+                    , Events.onInput InputChanged
+                    ]
+                    []
                 ]
-                []
             , Html.div [ Attrs.class "flex flex-col" ]
                 [ Html.div
-                    [ Attrs.class "grid grid-cols-3 border-b" ]
+                    [ Attrs.class "grid grid-cols-3 border-b pb-3" ]
                     [ viewRotorSelect "Rotor 1" model.enigma.leftRotor (RotorChanged LeftRotor)
                     , viewRingSetting model.leftRotorSetting (RingSettingChanged LeftRotor)
                     , viewRotorPosition model.leftRotorPosition (RotorPositionChanged LeftRotor)
                     ]
                 , Html.div
-                    [ Attrs.class "grid grid-cols-3 border-b" ]
+                    [ Attrs.class "grid grid-cols-3 border-b py-3" ]
                     [ viewRotorSelect "Rotor 2" model.enigma.middleRotor (RotorChanged MiddleRotor)
                     , viewRingSetting model.middleRotorSetting (RingSettingChanged MiddleRotor)
                     , viewRotorPosition model.middleRotorPosition (RotorPositionChanged MiddleRotor)
                     ]
                 , Html.div
-                    [ Attrs.class "grid grid-cols-3 border-b" ]
+                    [ Attrs.class "grid grid-cols-3 border-b py-3" ]
                     [ viewRotorSelect "Rotor 3" model.enigma.rightRotor (RotorChanged RightRotor)
                     , viewRingSetting model.rightRotorSetting (RingSettingChanged RightRotor)
                     , viewRotorPosition model.rightRotorPosition (RotorPositionChanged RightRotor)
@@ -166,7 +172,7 @@ view model =
                         ]
                         [ Html.text "Plugboard" ]
                     , Html.input
-                        [ Attrs.class "border-1 mt-1 p-1"
+                        [ Attrs.class "border-1 p-1"
                         , Attrs.type_ "text"
                         , Attrs.value model.plugboardInput
                         , Events.onInput PlugboardChanged
@@ -175,7 +181,13 @@ view model =
                     , viewValidationErrors model.validationErrors PlugboardInput
                     ]
                 ]
-            , Html.div [ Attrs.class "font-semibold text-2xl border py-1 px-2 border-dotted" ] [ Html.text (decorateOutput encoded) ]
+            , Html.div [ Attrs.class "flex flex-col" ]
+                [ Html.label
+                    [ Attrs.class "font-semibold uppercase text-xs text-neutral-400"
+                    ]
+                    [ Html.text "Output" ]
+                , Html.div [ Attrs.class "flex-grow min-h-[100px] font-semibold text-2xl border-2 py-1 px-2 border-dotted" ] [ Html.text (decorateOutput encoded) ]
+                ]
             ]
         ]
 
@@ -218,7 +230,7 @@ reflectorOptions chosenOne =
 
 viewRotorSelect : String -> ChosenRotor -> (String -> msg) -> Html msg
 viewRotorSelect label chosenOne onInput =
-    Html.div [ Attrs.class "flex flex-col border-r py-3" ]
+    Html.div [ Attrs.class "flex flex-col border-r" ]
         [ Html.label
             [ Attrs.class "pl-3 uppercase text-xs text-neutral-400"
             ]
@@ -254,7 +266,7 @@ indexOptions chosenOne =
 
 viewRotorPosition : Int -> (String -> msg) -> Html msg
 viewRotorPosition position onInput =
-    Html.div [ Attrs.class "flex flex-col py-3" ]
+    Html.div [ Attrs.class "flex flex-col" ]
         [ Html.label
             [ Attrs.class "pl-3 uppercase text-xs text-neutral-400"
             ]
@@ -269,7 +281,7 @@ viewRotorPosition position onInput =
 
 viewRingSetting : Int -> (String -> msg) -> Html msg
 viewRingSetting setting onInput =
-    Html.div [ Attrs.class "flex flex-col border-r py-3" ]
+    Html.div [ Attrs.class "flex flex-col border-r" ]
         [ Html.label
             [ Attrs.class "pl-3 uppercase text-xs text-neutral-400"
             ]
