@@ -259,7 +259,8 @@ indexOptions chosenOne =
                         []
             in
             Html.option (Attrs.value value :: selectedAttrs)
-                [ Html.text <| value ++ " - " ++ indexToLetter index ]
+                -- we pass `index - 1` because these indexes are 1-based
+                [ Html.text <| value ++ " - " ++ indexToLetter (index - 1) ]
         )
         (List.range 1 26)
 
@@ -270,7 +271,7 @@ viewRotorPosition position chosen onInput =
         [ Html.label
             [ Attrs.class "pl-3 uppercase text-xs text-neutral-400"
             ]
-            [ Html.text <| "Position:  " ++ indexToLetter (chosen.position + 1) ]
+            [ Html.text <| "Position:  " ++ indexToLetter chosen.position ]
         , Html.select
             [ Attrs.class "border-0 py-0 font-semibold"
             , Events.onInput onInput
@@ -296,7 +297,7 @@ viewRingSetting setting onInput =
 
 indexToLetter : Int -> String
 indexToLetter value =
-    Char.fromCode (value + 64)
+    Char.fromCode (value + 65)
         |> String.fromChar
 
 
