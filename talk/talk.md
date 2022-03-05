@@ -261,6 +261,58 @@ The cipher changes at every keypress! How?
 
 ---
 
+# Rotor: encoding
+
+```elm
+encode : Char -> Enigma -> ( Char, Enigma )
+encode input enigma =
+    let
+        ({ leftRotor, middleRotor, rightRotor } as stepped) =
+            step enigma
+    in
+    ( input
+        |> Plugboard.swap enigma.plugboard
+        |> Rotor.toRotorOffset
+        |> Rotor.forward rightRotor
+        |> Rotor.forward middleRotor
+        |> Rotor.forward leftRotor
+        |> Reflector.reflect enigma.reflector
+        |> Rotor.backward leftRotor
+        |> Rotor.backward middleRotor
+        |> Rotor.backward rightRotor
+        |> Rotor.fromRotorOffset
+        |> Plugboard.swap enigma.plugboard
+    , stepped
+    )
+```
+
+---
+
+# Rotor: stepping
+
+```elm
+step : Enigma -> Enigma
+step ({ leftRotor, middleRotor, rightRotor } as info) =
+    case ( Rotor.atNotch middleRotor , Rotor.atNotch rightRotor) of
+        ( True, _ ) ->
+            { info
+                | middleRotor = Rotor.turn middleRotor
+                , leftRotor = Rotor.turn leftRotor
+                , rightRotor = Rotor.turn rightRotor
+            }
+
+        ( _, True ) ->
+            { info
+                | middleRotor = Rotor.turn middleRotor
+                , rightRotor = Rotor.turn rightRotor
+            }
+
+        _ ->
+            { info | rightRotor = Rotor.turn rightRotor }
+```
+
+---
+
 # Let's try it out!
 
 ---

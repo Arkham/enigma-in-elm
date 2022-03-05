@@ -183,10 +183,11 @@ view model =
                 ]
             , Html.div [ Attrs.class "flex flex-col" ]
                 [ Html.label
-                    [ Attrs.class "font-semibold uppercase text-xs text-neutral-400"
-                    ]
+                    [ Attrs.class "font-semibold uppercase text-xs text-neutral-400" ]
                     [ Html.text "Output" ]
-                , Html.div [ Attrs.class "flex-grow min-h-[100px] font-semibold text-2xl border-2 py-1 px-2 border-dotted" ] [ Html.text (decorateOutput encoded) ]
+                , Html.div
+                    [ Attrs.class "flex-grow min-h-[100px] font-semibold text-2xl border-2 py-1 px-2 border-dotted" ]
+                    [ Html.text (decorateOutput encoded) ]
                 ]
             ]
         ]
@@ -309,7 +310,15 @@ viewValidationErrors validationErrors field =
 
         errors ->
             Html.ul [] <|
-                List.map (\e -> Html.li [] [ Html.p [ Attrs.class "text-xs break-normal" ] [ Html.text e ] ]) errors
+                List.map
+                    (\e ->
+                        Html.li []
+                            [ Html.p
+                                [ Attrs.class "text-xs break-normal" ]
+                                [ Html.text e ]
+                            ]
+                    )
+                    errors
 
 
 decorateOutput : String -> String
