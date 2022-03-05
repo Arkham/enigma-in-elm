@@ -3,6 +3,7 @@ module Rotor exposing
     , ChosenRotor, choose, chooseFromString
     , atNotch, turn
     , forward, backward
+    , toRotorOffset, fromRotorOffset
     , allRotors
     , rotorI, rotorII, rotorIII, rotorIV, rotorV, rotorVI, rotorVII
     )
@@ -31,6 +32,7 @@ then advance the next rotor.
 
 @docs atNotch, turn
 @docs forward, backward
+@docs toRotorOffset, fromRotorOffset
 
 
 # Known rotors
@@ -167,6 +169,23 @@ chooseFromString : String -> Int -> Int -> Maybe ChosenRotor
 chooseFromString str position setting =
     Dict.get str rotorsByName
         |> Maybe.map (\rotor -> choose rotor position setting)
+
+
+{-| When we switch from the plugboard to the rotors, we stop caring about which
+is the letter that was pressed, but we only care about the offset of the rotor.
+-}
+toRotorOffset : Char -> Int
+toRotorOffset c =
+    Char.toCode c - 65
+
+
+{-| When we switch from the rotors to the plugboard, we stop caring about the
+offset of the rotor and again we care about which is the character connected to
+the current circuit.
+-}
+fromRotorOffset : Int -> Char
+fromRotorOffset i =
+    Char.fromCode (i + 65)
 
 
 atNotch : ChosenRotor -> Bool

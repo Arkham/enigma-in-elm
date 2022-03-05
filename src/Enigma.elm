@@ -64,7 +64,7 @@ encode input enigma =
     in
     ( input
         |> Plugboard.swap enigma.plugboard
-        |> (\e -> Char.toCode e - 65)
+        |> Rotor.toRotorOffset
         |> Rotor.forward rightRotor
         |> Rotor.forward middleRotor
         |> Rotor.forward leftRotor
@@ -72,7 +72,7 @@ encode input enigma =
         |> Rotor.backward leftRotor
         |> Rotor.backward middleRotor
         |> Rotor.backward rightRotor
-        |> (\e -> Char.fromCode (e + 65))
+        |> Rotor.fromRotorOffset
         |> Plugboard.swap enigma.plugboard
     , stepped
     )
