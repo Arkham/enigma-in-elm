@@ -327,14 +327,7 @@ step ({ leftRotor, middleRotor, rightRotor } as info) =
 - Plugboard: SV GO PA ZR FN HI YM WT DE BJ
 - Random starting position: 5 12 13
 - Message key: MIC
-
----
-
-# Thank you!
-
-- [@arkh4m](https://twitter.com/arkh4m)
-- [https://enigma.juliu.is](https://enigma.juliu.is)
-- [https://github.com/arkham/enigma-in-elm](https://github.com/arkham/enigma-in-elm)
+- Message: `KEINE BESONDEREN EREIGNISSE`
 
 ---
 
@@ -354,3 +347,16 @@ step ({ leftRotor, middleRotor, rightRotor } as info) =
   [https://www.ciphermachinesandcryptology.com](https://www.ciphermachinesandcryptology.com)
 - The German cipher machine Enigma
   [https://www.matematiksider.dk/enigma_eng.html](https://www.matematiksider.dk/enigma_eng.html)
+
+---
+
+# Thank you!
+
+![](ua.jpg)
+
+- [@arkh4m](https://twitter.com/arkh4m)
+- [https://enigma.juliu.is](https://enigma.juliu.is)
+- [https://github.com/arkham/enigma-in-elm](https://github.com/arkham/enigma-in-elm)
+- [https://donate.unhcr.org/int/en/ukraine-emergency](https://donate.unhcr.org/int/en/ukraine-emergency)
+
+![inline 79%](donate.png)
