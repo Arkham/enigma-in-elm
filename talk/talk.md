@@ -173,7 +173,7 @@ turns into
 ![right](army-enigma.jpeg)
 
 - Used from the 1920s
-- Used by all Wermacht in WW2
+- Used by all Wehrmacht in WW2
 - Mechanical with a battery
 - Polyalphabetic cipher
 
@@ -205,6 +205,42 @@ The cipher changes at every keypress! How?
 
 ---
 
+# How to use the Enigma Machine
+
+---
+
+![fit](codebook.jpg)
+
+---
+
+# How to encipher a message
+
+- Open the codebook
+- Pick the rotors with the right settings
+- Set the plugboard
+- Set the rotor positions randomly (write this down)
+- Choose a three letter message key and encode it twice (write it down)
+- Set the rotors positions to the message key and encrypt the message
+- Send in plaintext the initial random positions, the six letter encoded
+  message key and the encrypted message
+
+---
+
+![](message.jpeg)
+
+---
+
+# How to decipher a message
+
+- Open the codebook
+- Pick the rotors with the right settings
+- Set the plugboard
+- Set the rotor positions to the three letter plaintext message
+- Decode the six letters to get the message key repeated twice
+- Set the rotors to the message key and decrypt the message
+
+---
+
 # Elm!
 
 ---
@@ -225,43 +261,13 @@ The cipher changes at every keypress! How?
 
 ---
 
-# Tutorial
+# Let's try it out!
 
 ---
 
 ![fit](codebook.jpg)
 
 ---
-
-# How to encipher a message
-
-- open the codebook
-- pick the rotors with the right settings
-- set the plugboard
-- set the rotor positions randomly (write this down)
-- choose a three letter message key and encode it twice (write it down)
-- set the rotors positions to the message key and encrypt the message
-- send in plaintext the initial random positions, the six letter encoded
-  message key and the encrypted message
-
----
-
-![](message.jpeg)
-
----
-
-# How to decipher a message
-
-- open the codebook
-- pick the rotors with the right settings
-- set the plugboard
-- set the rotor positions to the three letter plaintext message
-- decode the six letters to get the message key repeated twice
-- set the rotors to the message key and decrypt the message
-
----
-
-# Let's try it out
 
 - Today is the 11th
 - Rotors: V I III
