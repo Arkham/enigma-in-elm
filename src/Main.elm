@@ -115,7 +115,7 @@ main =
 view : Model -> Html Msg
 view model =
     let
-        ( encoded, _ ) =
+        ( encoded, afterEncoding ) =
             Enigma.encodeString model.input model.enigma
     in
     Html.section [ Attrs.class "max-w-md xl:max-w-6xl mx-auto" ]
@@ -141,19 +141,19 @@ view model =
                     [ Attrs.class "grid grid-cols-3 border-b pb-3" ]
                     [ viewRotorSelect "Rotor 1" model.enigma.leftRotor (RotorChanged LeftRotor)
                     , viewRingSetting model.leftRotorSetting (RingSettingChanged LeftRotor)
-                    , viewRotorPosition model.leftRotorPosition (RotorPositionChanged LeftRotor)
+                    , viewRotorPosition model.leftRotorPosition afterEncoding.leftRotor (RotorPositionChanged LeftRotor)
                     ]
                 , Html.div
                     [ Attrs.class "grid grid-cols-3 border-b py-3" ]
                     [ viewRotorSelect "Rotor 2" model.enigma.middleRotor (RotorChanged MiddleRotor)
                     , viewRingSetting model.middleRotorSetting (RingSettingChanged MiddleRotor)
-                    , viewRotorPosition model.middleRotorPosition (RotorPositionChanged MiddleRotor)
+                    , viewRotorPosition model.middleRotorPosition afterEncoding.middleRotor (RotorPositionChanged MiddleRotor)
                     ]
                 , Html.div
                     [ Attrs.class "grid grid-cols-3 border-b py-3" ]
                     [ viewRotorSelect "Rotor 3" model.enigma.rightRotor (RotorChanged RightRotor)
                     , viewRingSetting model.rightRotorSetting (RingSettingChanged RightRotor)
-                    , viewRotorPosition model.rightRotorPosition (RotorPositionChanged RightRotor)
+                    , viewRotorPosition model.rightRotorPosition afterEncoding.rightRotor (RotorPositionChanged RightRotor)
                     ]
                 , Html.div [ Attrs.class "flex flex-col py-3 border-b" ]
                     [ Html.label
@@ -264,13 +264,13 @@ indexOptions chosenOne =
         (List.range 1 26)
 
 
-viewRotorPosition : Int -> (String -> msg) -> Html msg
-viewRotorPosition position onInput =
+viewRotorPosition : Int -> ChosenRotor -> (String -> msg) -> Html msg
+viewRotorPosition position chosen onInput =
     Html.div [ Attrs.class "flex flex-col" ]
         [ Html.label
             [ Attrs.class "pl-3 uppercase text-xs text-neutral-400"
             ]
-            [ Html.text "Position" ]
+            [ Html.text <| "Position:  " ++ indexToLetter (chosen.position + 1) ]
         , Html.select
             [ Attrs.class "border-0 py-0 font-semibold"
             , Events.onInput onInput
