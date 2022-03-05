@@ -45,7 +45,7 @@ errorToString { problem } =
             Just string
 
         _ ->
-            Just "I'm expecting a list of pairs of letters to be swapped (e.g. 'ab cd ef')."
+            Just "I'm expecting a list of pairs of letters to be swapped (e.g. 'ab cd')."
 
 
 parser : Parser Plugboard

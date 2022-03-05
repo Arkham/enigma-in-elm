@@ -11,10 +11,6 @@ theme: Olive Green, 9
 
 ---
 
-# Hello! 🐒
-
----
-
 # My name is Ju 🙇🏻‍♂️
 
 ---
@@ -221,8 +217,7 @@ The cipher changes at every keypress! How?
 - Set the rotor positions randomly (write this down)
 - Choose a three letter message key and encode it twice (write it down)
 - Set the rotors positions to the message key and encrypt the message
-- Send in plaintext the initial random positions, the six letter encoded
-  message key and the encrypted message
+- Send in plaintext the initial random positions, the six letter encoded message key and the encrypted message
 
 ---
 
@@ -253,6 +248,7 @@ The cipher changes at every keypress! How?
 
 - Statically typed
 - Pure
+- Compiles to JS
 - Fun (hehe)
 
 ---
