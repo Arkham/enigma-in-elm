@@ -343,6 +343,8 @@ step ({ leftRotor, middleRotor, rightRotor } as info) =
   [https://www.ciphermachinesandcryptology.com](https://www.ciphermachinesandcryptology.com)
 - The German cipher machine Enigma
   [https://www.matematiksider.dk/enigma_eng.html](https://www.matematiksider.dk/enigma_eng.html)
+- 3D printed Enigma machine
+  [https://www.youtube.com/watch?v=RP10yP5WgSM](https://www.youtube.com/watch?v=RP10yP5WgSM)
 
 ---
 
