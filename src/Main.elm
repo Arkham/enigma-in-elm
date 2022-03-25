@@ -8,9 +8,9 @@ import Html exposing (Html)
 import Html.Attributes as Attrs
 import Html.Events as Events
 import List.Extra
-import Plugboard exposing (Plugboard)
+import Plugboard
 import Reflector exposing (Reflector)
-import Rotor exposing (ChosenRotor, Rotor)
+import Rotor exposing (ChosenRotor)
 
 
 type alias ValidationErrors =

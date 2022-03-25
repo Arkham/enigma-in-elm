@@ -81,7 +81,7 @@ pairParser acc =
                             )
 
                 -- this should never happen
-                other ->
+                _ ->
                     P.problem ("I expected to find two characters, but instead I found: '" ++ parsed ++ "'")
         )
         twoChars
