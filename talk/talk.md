@@ -1,4 +1,4 @@
-footer: bobkonf 2022 / **@arkh4m**
+footer: LambdaDays 2022 / **@arkh4m**
 autoscale: true
 build-lists: true
 theme: Olive Green, 9
@@ -21,7 +21,6 @@ theme: Olive Green, 9
 - Grew up in 🇮🇹
 - Live in 🇬🇧
 - Find me at **@arkh4m**
-- Work for no\_red\_ink
 
 ---
 
@@ -154,6 +153,10 @@ turns into
 
 ---
 
+![fit](the-code-book.jpg)
+
+---
+
 # Fast forward a 1000 years...
 
 ---
@@ -205,6 +208,10 @@ The cipher changes at every keypress! How?
 
 ---
 
+![fit](in-action.jpg)
+
+---
+
 ![fit](codebook.jpg)
 
 ---
@@ -250,10 +257,17 @@ The cipher changes at every keypress! How?
 - Pure
 - Compiles to JS
 - Fun (hehe)
+- https://elm-lang.org
 
 ---
 
 # Code dive 🤿
+
+---
+
+# Journey of a letter
+
+![inline](diagram.jpg)
 
 ---
 
@@ -317,10 +331,10 @@ step ({ leftRotor, middleRotor, rightRotor } as info) =
 
 ---
 
-- Today is the 11th
-- Rotors: V I III
-- Settings: 17 13 04
-- Plugboard: SV GO PA ZR FN HI YM WT DE BJ
+- Today is the 28th
+- Rotors: IV III I
+- Settings: 03 04 22
+- Plugboard: YT BX CV ZN UD IR SJ HW GA KQ
 - Random starting position: 5 12 13
 - Message key: MIC
 - Message: `KEINE BESONDEREN EREIGNISSE`
